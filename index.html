@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<title>ずんだ交通誘導タイピング v05s(スマホ公開版)</title>
+<title>ずんだ交通誘導タイピング v06s(スマホ公開版)</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>
   html,body{margin:0;padding:0;overflow:hidden;background:#1a2330;font-family:"Yu Gothic UI","Meiryo",sans-serif;user-select:none;}
@@ -1541,14 +1541,16 @@ function gameOver(){
       '<div class="sub">到達速度 '+G.est.kps.toFixed(1)+'打/秒（e-typing '+(G.est.kps*60|0)+'点相当）</div>'+
       resultHTML(r)+'</div>'+
       '<div class="sub">自己ベスト: '+(best.endPeds||0)+'人</div>'+
-      '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button><button class="chip" id="btnTitle">タイトルへ</button></div>');
+      '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button>'+rankBtnsHTML()+'<button class="chip" id="btnTitle">タイトルへ</button></div>');
     ovlEl.querySelector('#btnRetry').onclick=startEndless;
+    ovlEl.querySelector('#btnRank').onclick=e=>submitRank(G.score,'エンドレス'+G.endCount+'人・'+r.cert,e.target);
     ovlEl.querySelector('#btnTitle').onclick=showTitle;
     return;
   }
   showOvl('<h1>ゲームオーバー</h1><div class="sub">旗が全部なくなってしまった…</div>'+resultHTML(r)+
-    '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button><button class="chip" id="btnTitle">タイトルへ</button></div>');
+    '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button>'+rankBtnsHTML()+'<button class="chip" id="btnTitle">タイトルへ</button></div>');
   ovlEl.querySelector('#btnRetry').onclick=()=>startGame(G.startIdx);
+  ovlEl.querySelector('#btnRank').onclick=e=>submitRank(G.score,r.cert+'認定',e.target);
   ovlEl.querySelector('#btnTitle').onclick=showTitle;
 }
 function allClear(){
@@ -1556,8 +1558,9 @@ function allClear(){
   burstConfetti(); burstConfetti();
   const r=calcResult(); saveBest(r);
   showOvl('<h1>🎉 全ステージ制覇！ 🎉</h1><div class="sub">達人の誘導、おみごとなのだ！！</div>'+resultHTML(r)+
-    '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button><button class="chip" id="btnTitle">タイトルへ</button></div>');
+    '<div class="btnrow"><button class="chip main" id="btnRetry">もう一度 (Enter)</button>'+rankBtnsHTML()+'<button class="chip" id="btnTitle">タイトルへ</button></div>');
   ovlEl.querySelector('#btnRetry').onclick=()=>startGame(G.startIdx);
+  ovlEl.querySelector('#btnRank').onclick=e=>submitRank(G.score,'全制覇・'+r.cert+'認定',e.target);
   ovlEl.querySelector('#btnTitle').onclick=showTitle;
 }
 
@@ -1682,6 +1685,37 @@ if(isTouch){
   kb.addEventListener('pointerdown',e=>{ e.preventDefault(); kbFocus(); });
   document.body.appendChild(kb);
   const sh=$('skipHint'); if(sh) sh.textContent='タップ: スキップ';
+}
+// ==== v06: オンラインランキング（ゲームランキング台帳 GAS API） ====
+const RANK_API='https://script.google.com/macros/s/AKfycbz3yJMoui8-HX0iec4dLgW-Wk2nwBxa8t86CmGiuU9-PqqjG8PVb6emUodSweBZfID0Mw/exec';
+const RANK_PAGE='https://helmetto2-prog.github.io/ranking-hiroba/';
+const RANK_GAME='ずんだ交通誘導タイピング';
+function rankName(){
+  let n=''; try{ n=localStorage.getItem('zunda_rank_name')||''; }catch(e){}
+  if(!n){
+    n=(prompt('ランキングに のせる名前（12文字まで）','')||'').slice(0,12).trim();
+    if(n){ try{ localStorage.setItem('zunda_rank_name',n); }catch(e){} }
+  }
+  return n;
+}
+async function submitRank(score,extra,btn){
+  const n=rankName(); if(!n) return;
+  if(btn){ btn.disabled=true; btn.textContent='送信中…'; }
+  try{
+    const fd=new URLSearchParams();
+    fd.append('action','submit'); fd.append('game',RANK_GAME);
+    fd.append('name',n); fd.append('score',String(Math.round(score))); fd.append('extra',extra||'');
+    const res=await fetch(RANK_API,{method:'POST',body:fd});
+    const d=await res.json();
+    if(!d.ok) throw 0;
+    if(btn){ btn.textContent='✅ 登録完了！ 現在 '+d.rank+'位'; }
+  }catch(e){
+    if(btn){ btn.disabled=false; btn.textContent='送信失敗…もう一度'; }
+  }
+}
+function rankBtnsHTML(){
+  return '<button class="chip" id="btnRank">🏆 ランキングに登録</button>'+
+    '<a class="chip" href="'+RANK_PAGE+'" target="_blank" style="text-decoration:none">🌍 広場を見る</a>';
 }
 // 最初のクリック/キーでBGM解錠
 ['click','keydown'].forEach(ev=>addEventListener(ev,()=>{
