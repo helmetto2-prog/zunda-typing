@@ -36,6 +36,15 @@
   /* ---- 中央オーバーレイ（タイトル・ステージ・結果） ---- */
   .ovl{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;color:#fff;text-align:center;background:rgba(8,12,20,.55);}
   .ovl h1{font-size:clamp(28px,5vw,46px);margin:.2em 0;text-shadow:0 3px 10px rgba(0,0,0,.7);}
+  /* タイトル画面を作り直し：ふちどり＋黄色のグラデーションのロゴ・工事のしま帯 */
+  .ovl .teng{font-size:clamp(10px,1.4vw,13px);font-weight:bold;letter-spacing:.4em;color:#ffe27a;text-shadow:0 1px 6px #000;margin-bottom:2px}
+  .ovl h1.tlogo{font-size:clamp(26px,5.6vw,62px);font-weight:900;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:.25em;text-shadow:none;margin:.1em 0 .15em;animation:tlIn .8s cubic-bezier(.2,1.5,.4,1) both}
+  .ovl h1.tlogo .tl{position:relative;display:inline-block;letter-spacing:.04em}
+  .ovl h1.tlogo .tl::before{content:attr(data-t);position:absolute;left:0;top:0;-webkit-text-fill-color:#14181f;color:#14181f;-webkit-text-stroke:.2em #14181f;filter:drop-shadow(0 0 .22em rgba(255,170,0,.95)) drop-shadow(0 .1em .14em #000)}
+  .ovl h1.tlogo .tl::after{content:attr(data-t);position:absolute;left:0;top:0;-webkit-text-fill-color:#fff;color:#fff;-webkit-text-stroke:.07em #fff}
+  .ovl h1.tlogo .tlt{position:relative;z-index:1;background:linear-gradient(180deg,#fffde0 0%,#ffd21f 45%,#ff8a00 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+  .ovl .tstripe{width:min(620px,80%);height:9px;margin:2px auto 12px;border-radius:5px;background:repeating-linear-gradient(-45deg,#ffd21f 0 14px,#14181f 14px 28px);box-shadow:0 3px 10px rgba(0,0,0,.6)}
+  @keyframes tlIn{from{opacity:0;transform:translateY(-24px) scale(1.12)}to{opacity:1;transform:none}}
   .ovl h2{font-size:clamp(20px,3.4vw,32px);margin:.2em 0;}
   .ovl .sub{font-size:15px;color:#cfd8dc;margin:4px 0;}
   .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0;}
@@ -1139,7 +1148,7 @@ function showTitle(){
   let bestLine=best.score?('ベストスコア: '+best.score+'　最高認定: '+(best.cert||'—')):'';
   if(best.endPeds) bestLine+='　エンドレス最高: '+best.endPeds+'人';
   const o=showOvl(
-    '<h1>🚧 ずんだ交通誘導タイピング 🚩</h1>'+
+    '<div class="teng">ZUNDA TRAFFIC CONTROL TYPING</div><h1 class="tlogo"><span>🚧</span><span class="tl" data-t="ずんだ交通誘導タイピング"><span class="tlt">ずんだ交通誘導タイピング</span></span><span>🚩</span></h1><div class="tstripe"></div>'+   // タイトル画面を作り直し：ふちどり＋黄色のグラデーションのロゴ・工事のしま帯
     '<div class="sub">向こうからやってくる通行人を、文章タイピングで停止線までに誘導完了させよう！<br>'+
     '3人誘導するごとに、ずんだもんの本格旗振り（実際の警備合図）が見られるのだ。</div>'+
     '<div class="sub" style="color:#ffcc80">'+bestLine+'</div>'+
